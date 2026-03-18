@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JotzAI — Company Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:        #1C202E;
+      --bg2:       #232738;
+      --card:      #353A4B;
+      --card2:     #3F4559;
+      --violet:    #7A4CFD;
+      --violet2:   #5825E7;
+      --green:     #E2F261;
+      --green2:    #cde040;
+      --text:      #F0F2FF;
+      --text2:     #A8AECB;
+      --text3:     #6B7194;
+      --border:    #424766;
+      --danger:    #FF6B6B;
+      --warning:   #FFB547;
+      --success:   #4ECDC4;
+      --funding:   #A78BFA;
+      --news:      #60A5FA;
+      --hiring:    #34D399;
+      --launch:    #F59E0B;
+      --leadership:#F87171;
+      --award:     #FBBF24;
+    }
+    html { font-size: 14px; }
+    body {
+      font-family: 'Manrope', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ── Scrollbar ─────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── Sidebar ───────────────────────────────────────────────── */
+    .sidebar {
+      width: 220px;
+      min-width: 220px;
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      position: relative;
+      z-index: 10;
+    }
+    .sidebar-logo {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo-mark {
+      font-family: 'Ubuntu', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+    .logo-mark span { color: var(--green); }
+    .logo-sub {
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 2px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 0;
+    }
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text3);
+      padding: 8px 20px 4px;
+      margin-top: 8px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 0;
+      transition: background 0.15s, color 0.15s;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text2);
+      position: relative;
+      border-left: 3px solid transparent;
+    }
+    .nav-item:hover { background: rgba(122,76,253,0.08); color: var(--text); }
+    .nav-item.active {
+      background: rgba(122,76,253,0.14);
+      color: var(--text);
+      border-left-color: var(--violet);
+    }
+    .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .nav-badge {
+      margin-left: auto;
+      background: var(--violet);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 20px;
+      text-align: center;
+    }
+    .nav-badge.green { background: var(--green); color: #1C202E; }
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--violet), var(--violet2));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Ubuntu', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      color: #fff;
+    }
+    .user-info { flex: 1; overflow: hidden; }
+    .user-name { font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 11px; color: var(--text3); }
+
+    /* ── Main Content ──────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      height: 60px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      flex-shrink: 0;
+    }
+    .topbar-title {
+      font-family: 'Ubuntu', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .topbar-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .btn {
+      font-family: 'Ubuntu', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary { background: var(--violet); color: #fff; }
+    .btn-primary:hover { background: var(--violet2); }
+    .btn-green { background: var(--green); color: #1C202E; font-weight: 700; }
+    .btn-green:hover { background: var(--green2); }
+    .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--card); color: var(--text); }
+    .btn-sm { padding: 5px 11px; font-size: 12px; border-radius: 6px; }
+    .btn-icon { padding: 7px; border-radius: 8px; }
+    .sync-dot {
+      width: 8px; height: 8px; background: var(--green);
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* ── Content Area ──────────────────────────────────────────── */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 28px;
+    }
+
+    /* ── Screens ───────────────────────────────────────────────── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── Stats Row ─────────────────────────────────────────────── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .stat-icon {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .stat-icon.violet { background: rgba(122,76,253,0.18); }
+    .stat-icon.green  { background: rgba(226,242,97,0.15); }
+    .stat-icon.orange { background: rgba(255,181,71,0.15); }
+    .stat-icon.teal   { background: rgba(78,205,196,0.15); }
+    .stat-label { font-size: 12px; color: var(--text3); margin-bottom: 3px; font-weight: 500; }
+    .stat-value { font-family: 'Ubuntu', sans-serif; font-size: 26px; font-weight: 700; line-height: 1; }
+    .stat-value.violet { color: var(--violet); }
+    .stat-value.green  { color: var(--green); }
+    .stat-value.orange { color: var(--warning); }
+    .stat-value.teal   { color: var(--success); }
+    .stat-delta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+    /* ── Filter Chips ──────────────────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .chip {
+      font-family: 'Ubuntu', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--text2);
+      background: transparent;
+      white-space: nowrap;
+    }
+    .chip:hover { border-color: var(--violet); color: var(--text); }
+    .chip.active { background: var(--violet); border-color: var(--violet); color: #fff; }
+    .chip-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    /* ── Alert Cards ───────────────────────────────────────────── */
+    .alerts-list { display: flex; flex-direction: column; gap: 14px; }
+    .alert-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      transition: border-color 0.2s, transform 0.2s, opacity 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .alert-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      border-radius: 14px 0 0 14px;
+    }
+    .alert-card.funding::before { background: var(--funding); }
+    .alert-card.news::before    { background: var(--news); }
+    .alert-card.hiring::before  { background: var(--hiring); }
+    .alert-card.product_launch::before { background: var(--launch); }
+    .alert-card.leadership::before { background: var(--leadership); }
+    .alert-card.award::before   { background: var(--award); }
+    .alert-card:hover { border-color: var(--violet); }
+    .alert-card.dismissing {
+      transform: translateX(60px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .alert-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .alert-company-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .alert-company-name {
+      font-family: 'Ubuntu', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .alert-company-name:hover { color: var(--violet); }
+    .badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .badge-active    { background: rgba(78,205,196,0.18); color: var(--success); border: 1px solid rgba(78,205,196,0.3); }
+    .badge-inactive  { background: rgba(168,174,203,0.15); color: var(--text2); border: 1px solid rgba(168,174,203,0.2); }
+    .badge-pipeline  { background: rgba(122,76,253,0.18); color: var(--violet); border: 1px solid rgba(122,76,253,0.3); }
+    .badge-standby   { background: rgba(255,181,71,0.15); color: var(--warning); border: 1px solid rgba(255,181,71,0.2); }
+    .badge-lost      { background: rgba(255,107,107,0.15); color: var(--danger); border: 1px solid rgba(255,107,107,0.2); }
+    .priority-tag {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .priority-high   { background: rgba(255,107,107,0.18); color: var(--danger); }
+    .priority-medium { background: rgba(255,181,71,0.18); color: var(--warning); }
+    .priority-low    { background: rgba(168,174,203,0.15); color: var(--text2); }
+    .alert-time { font-size: 11px; color: var(--text3); white-space: nowrap; }
+
+    .alert-body { margin-bottom: 14px; }
+    .alert-type-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .alert-type-icon { font-size: 16px; }
+    .alert-type-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .alert-type-label.funding    { color: var(--funding); }
+    .alert-type-label.news       { color: var(--news); }
+    .alert-type-label.hiring     { color: var(--hiring); }
+    .alert-type-label.product_launch { color: var(--launch); }
+    .alert-type-label.leadership { color: var(--leadership); }
+    .alert-type-label.award      { color: var(--award); }
+
+    .alert-title { font-size: 14.5px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+    .alert-summary { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+    .ai-suggestion-box {
+      background: rgba(122,76,253,0.08);
+      border: 1px solid rgba(122,76,253,0.25);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .ai-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .ai-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--violet);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 3px;
+    }
+    .ai-text { font-size: 13px; color: var(--text2); line-height: 1.55; }
+
+    .alert-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .action-btn {
+      font-family: 'Ubuntu', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 13px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text2);
+      cursor: pointer;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .action-btn:hover { background: var(--card2); color: var(--text); border-color: var(--text3); }
+    .action-btn.draft  { background: var(--green); border-color: var(--green); color: #1C202E; font-weight: 700; }
+    .action-btn.draft:hover { background: var(--green2); border-color: var(--green2); }
+    .action-btn.contacted { border-color: var(--success); color: var(--success); }
+    .action-btn.contacted:hover { background: rgba(78,205,196,0.1); }
+    .action-btn.dismiss { border-color: rgba(255,107,107,0.3); color: var(--danger); }
+    .action-btn.dismiss:hover { background: rgba(255,107,107,0.1); }
+
+    /* ── Empty State ───────────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text3);
+    }
+    .empty-icon { font-size: 48px; margin-bottom: 14px; }
+    .empty-title { font-family: 'Ubuntu', sans-serif; font-size: 18px; color: var(--text2); margin-bottom: 6px; }
+    .empty-text { font-size: 13px; }
+
+    /* ── Companies Screen ──────────────────────────────────────── */
+    .search-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .search-input-wrap {
+      position: relative;
+      flex: 1;
+      max-width: 360px;
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text3);
+      font-size: 15px;
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 12px 9px 36px;
+      font-family: 'Manrope', sans-serif;
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-input::placeholder { color: var(--text3); }
+    .search-input:focus { border-color: var(--violet); }
+
+    .companies-table-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .companies-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .companies-table th {
+      background: var(--card2);
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text3);
+      border-bottom: 1px solid var(--border);
+    }
+    .companies-table td {
+      padding: 13px 16px;
+      font-size: 13.5px;
+      border-bottom: 1px solid rgba(66,71,102,0.5);
+      vertical-align: middle;
+    }
+    .companies-table tr:last-child td { border-bottom: none; }
+    .companies-table tr:hover td { background: rgba(122,76,253,0.05); }
+    .company-link {
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .company-link:hover { color: var(--violet); }
+    .stage-tag {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text3);
+      background: rgba(107,113,148,0.2);
+      padding: 3px 8px;
+      border-radius: 5px;
+    }
+
+    /* ── Company Detail ────────────────────────────────────────── */
+    .detail-header {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .detail-company-name {
+      font-family: 'Ubuntu', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .detail-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .detail-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      color: var(--text2);
+    }
+    .detail-meta-item a { color: var(--violet); text-decoration: none; }
+    .detail-meta-item a:hover { text-decoration: underline; }
+    .back-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 14px;
+      color: var(--text2);
+      font-family: 'Ubuntu', sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .back-btn:hover { background: var(--card2); color: var(--text); }
+
+    .detail-info-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .info-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+    .info-card-label { font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 6px; }
+    .info-card-value { font-family: 'Ubuntu', sans-serif; font-size: 18px; font-weight: 700; }
+
+    .detail-timeline-title {
+      font-family: 'Ubuntu', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+    .timeline { display: flex; flex-direction: column; gap: 12px; }
+    .timeline-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .timeline-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      margin-top: 4px;
+      flex-shrink: 0;
+    }
+    .timeline-line {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .timeline-connector {
+      width: 2px;
+      flex: 1;
+      background: var(--border);
+      min-height: 20px;
+    }
+    .timeline-content {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      flex: 1;
+    }
+    .timeline-content-title { font-size: 13.5px; font-weight: 600; margin-bottom: 3px; }
+    .timeline-content-text  { font-size: 12.5px; color: var(--text2); line-height: 1.5; }
+    .timeline-date { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+    /* ── Modals ────────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      width: 90%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translateY(10px);
+      transition: transform 0.2s;
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .modal-title {
+      font-family: 'Ubuntu', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text3);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 2px;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-subtitle { font-size: 13px; color: var(--text2); margin-bottom: 16px; }
+    .modal-message {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: var(--text);
+      white-space: pre-wrap;
+      margin-bottom: 20px;
+    }
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .snooze-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .snooze-option {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+    .snooze-option:hover { border-color: var(--violet); background: rgba(122,76,253,0.1); color: var(--violet); }
+    .snooze-option.selected { border-color: var(--violet); background: rgba(122,76,253,0.15); color: var(--violet); }
+    .snooze-time { font-size: 11px; color: var(--text3); margin-top: 3px; }
+    .share-option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .share-option:hover { border-color: var(--violet); }
+    .share-option-icon { font-size: 24px; }
+    .share-option-label { font-size: 14px; font-weight: 600; }
+    .share-option-sub { font-size: 12px; color: var(--text3); }
+
+    /* ── Toast ─────────────────────────────────────────────────── */
+    .toast-container {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .toast {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 13.5px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 240px;
+      animation: slideUp 0.3s ease;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .toast.success { border-left: 3px solid var(--success); }
+    .toast.warning { border-left: 3px solid var(--warning); }
+    .toast.info    { border-left: 3px solid var(--violet); }
+    @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+    /* ── Loading ───────────────────────────────────────────────── */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+    .loading-logo {
+      font-family: 'Ubuntu', sans-serif;
+      font-weight: 700;
+      font-size: 32px;
+    }
+    .loading-logo span { color: var(--green); }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid rgba(122,76,253,0.2);
+      border-top-color: var(--violet);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 13px; color: var(--text3); }
+
+    /* ── Responsive tweaks ─────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .detail-info-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .sidebar { display: none; }
+      .stats-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loading Screen -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-logo">Jotz<span>AI</span></div>
+  <div class="spinner"></div>
+  <div class="loading-text">Loading intelligence data…</div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">Jotz<span>AI</span></div>
+    <div class="logo-sub">Company Intelligence</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Intelligence</div>
+    <div class="nav-item active" data-screen="alerts" onclick="navigate('alerts')">
+      <span class="nav-icon">🔔</span>
+      Alerts
+      <span class="nav-badge" id="alertsBadge">12</span>
+    </div>
+    <div class="nav-item" data-screen="companies" onclick="navigate('companies')">
+      <span class="nav-icon">🏢</span>
+      Companies
+    </div>
+    <div class="nav-section-label">Workspace</div>
+    <div class="nav-item" onclick="showToast('Pipeline view coming soon!', 'info')">
+      <span class="nav-icon">📈</span>
+      Pipeline
+    </div>
+    <div class="nav-item" onclick="showToast('Contacts view coming soon!', 'info')">
+      <span class="nav-icon">👥</span>
+      Contacts
+    </div>
+    <div class="nav-item" onclick="showToast('Reports coming soon!', 'info')">
+      <span class="nav-icon">📊</span>
+      Reports
+    </div>
+    <div class="nav-section-label">Settings</div>
+    <div class="nav-item" onclick="showToast('Settings coming soon!', 'info')">
+      <span class="nav-icon">⚙️</span>
+      Settings
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-avatar">JR</div>
+      <div class="user-info">
+        <div class="user-name">Josefina</div>
+        <div class="user-role">Head of Growth</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="topbarTitle">Alerts</div>
+      <div class="topbar-subtitle" id="topbarSubtitle">Company intelligence feed</div>
+    </div>
+    <div class="topbar-actions">
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3)">
+        <span class="sync-dot"></span>
+        <span id="syncLabel">Live</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="refreshAlerts()">↻ Refresh</button>
+      <button class="btn btn-green btn-sm" onclick="showToast('Sync started!', 'success')">⚡ Sync CRM</button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- ── ALERTS SCREEN ── -->
+    <section id="screen-alerts" class="screen active">
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon violet">🔔</div>
+          <div>
+            <div class="stat-label">Total Alerts</div>
+            <div class="stat-value violet" id="statTotal">—</div>
+            <div class="stat-delta">This week</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange">🔥</div>
+          <div>
+            <div class="stat-label">High Priority</div>
+            <div class="stat-value orange" id="statHigh">—</div>
+            <div class="stat-delta">Need attention</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">🏢</div>
+          <div>
+            <div class="stat-label">Companies w/ News</div>
+            <div class="stat-value green" id="statCompanies">—</div>
+            <div class="stat-delta">Active signals</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon teal">✉️</div>
+          <div>
+            <div class="stat-label">Contacted Today</div>
+            <div class="stat-value teal" id="statContacted">0</div>
+            <div class="stat-delta">Outreach sent</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-bar" id="alertFilterBar">
+        <button class="chip active" data-filter="all" onclick="filterAlerts('all')">All</button>
+        <button class="chip" data-filter="high" onclick="filterAlerts('high')">🔥 High Priority</button>
+        <button class="chip" data-filter="funding" onclick="filterAlerts('funding')">
+          <span class="chip-dot" style="background:var(--funding)"></span>Funding
+        </button>
+        <button class="chip" data-filter="news" onclick="filterAlerts('news')">
+          <span class="chip-dot" style="background:var(--news)"></span>News
+        </button>
+        <button class="chip" data-filter="hiring" onclick="filterAlerts('hiring')">
+          <span class="chip-dot" style="background:var(--hiring)"></span>Hiring
+        </button>
+        <button class="chip" data-filter="product_launch" onclick="filterAlerts('product_launch')">
+          <span class="chip-dot" style="background:var(--launch)"></span>Product Launch
+        </button>
+        <button class="chip" data-filter="leadership" onclick="filterAlerts('leadership')">
+          <span class="chip-dot" style="background:var(--leadership)"></span>Leadership
+        </button>
+        <button class="chip" data-filter="award" onclick="filterAlerts('award')">
+          <span class="chip-dot" style="background:var(--award)"></span>Award
+        </button>
+      </div>
+
+      <div class="alerts-list" id="alertsList">
+        <div class="empty-state">
+          <div class="spinner" style="margin:0 auto 16px"></div>
+          <div class="empty-text">Loading alerts…</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── COMPANIES SCREEN ── -->
+    <section id="screen-companies" class="screen">
+
+      <div class="search-row">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" type="text" id="companySearch" placeholder="Search companies…" oninput="searchCompanies()" />
+        </div>
+        <div class="filter-bar" style="margin:0;flex-wrap:nowrap">
+          <button class="chip active" data-cfilter="all" onclick="filterCompanies('all')">All</button>
+          <button class="chip" data-cfilter="Active Client" onclick="filterCompanies('Active Client')">Active</button>
+          <button class="chip" data-cfilter="Open Pipeline" onclick="filterCompanies('Open Pipeline')">Pipeline</button>
+          <button class="chip" data-cfilter="Inactive Client" onclick="filterCompanies('Inactive Client')">Inactive</button>
+          <button class="chip" data-cfilter="Standby" onclick="filterCompanies('Standby')">Standby</button>
+          <button class="chip" data-cfilter="Lost" onclick="filterCompanies('Lost')">Lost</button>
+        </div>
+      </div>
+
+      <div class="companies-table-wrap">
+        <table class="companies-table">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Account Type</th>
+              <th>Industry</th>
+              <th>CRM Stage</th>
+              <th>Last Contact</th>
+              <th>Open Deals</th>
+            </tr>
+          </thead>
+          <tbody id="companiesTableBody">
+            <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text3)">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+    <!-- ── COMPANY DETAIL SCREEN ── -->
+    <section id="screen-detail" class="screen">
+
+      <div class="detail-header">
+        <div>
+          <div class="detail-company-name" id="detailName">—</div>
+          <div class="detail-meta">
+            <span id="detailBadge"></span>
+            <span class="detail-meta-item" id="detailWebsite"></span>
+            <span class="detail-meta-item" id="detailIndustry"></span>
+          </div>
+        </div>
+        <button class="back-btn" onclick="navigate('companies')">← Back</button>
+      </div>
+
+      <div class="detail-info-grid">
+        <div class="info-card">
+          <div class="info-card-label">Last Contact</div>
+          <div class="info-card-value" id="detailLastContact">—</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Open Deals</div>
+          <div class="info-card-value" id="detailOpenDeals">—</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Revenue</div>
+          <div class="info-card-value" id="detailRevenue">—</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">CRM Stage</div>
+          <div class="info-card-value" id="detailStage" style="font-size:14px">—</div>
+        </div>
+      </div>
+
+      <div class="detail-timeline-title">Alert History</div>
+      <div class="timeline" id="detailTimeline">
+        <div class="empty-state">
+          <div class="empty-text" style="font-size:13px">No alerts for this company yet.</div>
+        </div>
+      </div>
+
+    </section>
+
+  </div><!-- /content -->
+</main>
+
+<!-- ── MODALS ── -->
+
+<!-- Draft Message Modal -->
+<div class="modal-overlay" id="draftModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">✉️ Draft Message</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:3px" id="draftModalSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('draftModal')">✕</button>
+    </div>
+    <div class="modal-subtitle" id="draftContext"></div>
+    <div class="modal-message" id="draftMessage" contenteditable="true"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('draftModal')">Cancel</button>
+      <button class="btn btn-ghost" onclick="copyDraft()">📋 Copy</button>
+      <button class="btn btn-green" onclick="markContacted()">✓ Mark as Contacted</button>
+    </div>
+  </div>
+</div>
+
+<!-- Snooze Modal -->
+<div class="modal-overlay" id="snoozeModal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header">
+      <div class="modal-title">⏰ Snooze Alert</div>
+      <button class="modal-close" onclick="closeModal('snoozeModal')">✕</button>
+    </div>
+    <div class="modal-subtitle">When should this alert resurface?</div>
+    <div class="snooze-options">
+      <div class="snooze-option" onclick="selectSnooze('1h', this)">
+        <div>1 hour</div>
+        <div class="snooze-time" id="snoozeTime1h"></div>
+      </div>
+      <div class="snooze-option" onclick="selectSnooze('3h', this)">
+        <div>3 hours</div>
+        <div class="snooze-time" id="snoozeTime3h"></div>
+      </div>
+      <div class="snooze-option" onclick="selectSnooze('tomorrow', this)">
+        <div>Tomorrow</div>
+        <div class="snooze-time" id="snoozeTimeTomorrow"></div>
+      </div>
+      <div class="snooze-option" onclick="selectSnooze('nextweek', this)">
+        <div>Next week</div>
+        <div class="snooze-time" id="snoozeTimeNextweek"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('snoozeModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmSnooze()">Snooze</button>
+    </div>
+  </div>
+</div>
+
+<!-- Share Modal -->
+<div class="modal-overlay" id="shareModal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header">
+      <div class="modal-title">🔗 Share Alert</div>
+      <button class="modal-close" onclick="closeModal('shareModal')">✕</button>
+    </div>
+    <div class="modal-subtitle">Share this intelligence with your team</div>
+    <div class="share-option" onclick="shareVia('email')">
+      <div class="share-option-icon">📧</div>
+      <div>
+        <div class="share-option-label">Email</div>
+        <div class="share-option-sub">Send via email client</div>
+      </div>
+    </div>
+    <div class="share-option" onclick="shareVia('slack')">
+      <div class="share-option-icon">💬</div>
+      <div>
+        <div class="share-option-label">Slack</div>
+        <div class="share-option-sub">Post to channel or DM</div>
+      </div>
+    </div>
+    <div class="share-option" onclick="shareVia('copy')">
+      <div class="share-option-icon">📋</div>
+      <div>
+        <div class="share-option-label">Copy Link</div>
+        <div class="share-option-sub">Copy summary to clipboard</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCRIPTS ── -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ── Config ───────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://ynnxqnnaszopeyvtoyys.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlubnhxbm5hc3pvcGV5dnRveXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTU4MjIsImV4cCI6MjA4OTQzMTgyMn0.8kLutEY3sSSPGDm_lPabDyS6wJcFu3lb2cP-RdJVkrc';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── App State ─────────────────────────────────────────────────────────
+let allAlerts    = [];
+let allCompanies = [];
+let activeFilter = 'all';
+let activeCompanyFilter = 'all';
+let activeDraftAlertId = null;
+let selectedSnooze = null;
+let activeSnoozeAlertId = null;
+let activeShareAlertId = null;
+let contactedCount = 0;
+
+// ── Demo Data ─────────────────────────────────────────────────────────
+const DEMO_COMPANIES = [
+  { id: 'c1', name: 'Headway Health', website: 'headway.co', industry: 'Mental Health Tech', account_type: 'Active Client', crm_stage: 'Delivery', last_contact: '2026-03-15', open_deals: 2, revenue: '$180K/yr', description: 'Mental health benefits platform for employers' },
+  { id: 'c2', name: 'Nuvation Bio', website: 'nuvationbio.com', industry: 'Oncology', account_type: 'Active Client', crm_stage: 'Delivery', last_contact: '2026-03-12', open_deals: 1, revenue: '$95K/yr', description: 'Clinical-stage oncology biopharmaceutical company' },
+  { id: 'c3', name: 'Calibrate Health', website: 'joincalibrate.com', industry: 'Metabolic Health', account_type: 'Open Pipeline', crm_stage: 'Proposal Sent', last_contact: '2026-03-08', open_deals: 1, revenue: '—', description: 'Metabolic health and weight management platform' },
+  { id: 'c4', name: 'Brightside Health', website: 'brightside.com', industry: 'Digital Therapeutics', account_type: 'Open Pipeline', crm_stage: 'Discovery Call', last_contact: '2026-02-28', open_deals: 0, revenue: '—', description: 'Anxiety and depression treatment platform' },
+  { id: 'c5', name: 'Wheel Health', website: 'wheel.com', industry: 'Telehealth', account_type: 'Inactive Client', crm_stage: 'Re-engagement', last_contact: '2025-11-20', open_deals: 0, revenue: '$42K (past)', description: 'Telehealth workforce platform' },
+  { id: 'c6', name: 'Sana Benefits', website: 'sanabenefits.com', industry: 'Health Insurance', account_type: 'Standby', crm_stage: 'Paused', last_contact: '2026-01-10', open_deals: 0, revenue: '—', description: 'Small business health insurance and benefits' },
+  { id: 'c7', name: 'Osmind', website: 'osmind.org', industry: 'Psychiatry', account_type: 'Active Client', crm_stage: 'Delivery', last_contact: '2026-03-14', open_deals: 1, revenue: '$68K/yr', description: 'EHR and research platform for innovative psychiatry' },
+  { id: 'c8', name: 'Lark Health', website: 'lark.com', industry: 'Chronic Disease', account_type: 'Lost', crm_stage: 'Closed Lost', last_contact: '2025-09-05', open_deals: 0, revenue: '—', description: 'AI-powered chronic disease prevention platform' },
+  { id: 'c9', name: 'Transcarent', website: 'transcarent.com', industry: 'Benefits Navigation', account_type: 'Open Pipeline', crm_stage: 'Intro Call', last_contact: '2026-03-10', open_deals: 1, revenue: '—', description: 'Health and care navigation for self-insured employers' },
+  { id: 'c10', name: 'Sprinter Health', website: 'sprinterhealth.com', industry: 'Home Health', account_type: 'Open Pipeline', crm_stage: 'RFP Stage', last_contact: '2026-03-05', open_deals: 2, revenue: '—', description: 'In-home lab and preventive care platform' },
+];
+
+const DEMO_ALERTS = [
+  {
+    id: 'a1', company_id: 'c1',
+    type: 'funding', priority: 'high',
+    title: 'Headway Health closes $125M Series D',
+    summary: 'Headway announced a $125M Series D round led by Andreessen Horowitz, bringing total funding to $325M. The company plans to expand its clinician network to 50 states by end of 2026 and invest in its enterprise benefits offering.',
+    source_name: 'TechCrunch', published_at: '2026-03-17T14:00:00Z',
+    ai_suggestion: 'This is a major validation signal. Reach out to celebrate and explore whether the new capital unlocks a roadmap expansion we could support — new features, international, or mobile.',
+    draft_message: `Hi Sarah,\n\nJust saw the news about Headway's $125M Series D — congratulations to the whole team! Andreessen Horowitz backing is a massive vote of confidence in the vision you've been building.\n\nAs you plan what to build with this new runway, I'd love to explore how Light-it can continue to be a strategic partner. We've loved working on your clinician onboarding experience, and I can see several areas where we could help accelerate your expansion to all 50 states.\n\nWould you have 20 minutes this week for a quick call?\n\nBest,\nJosefina\nHead of Growth · Light-it`,
+    status: 'new'
+  },
+  {
+    id: 'a2', company_id: 'c3',
+    type: 'leadership', priority: 'high',
+    title: 'Calibrate Health appoints new Chief Product Officer',
+    summary: 'Calibrate announced the appointment of Marcus Webb as Chief Product Officer, joining from Noom where he led product for their enterprise division. This signals a major shift toward B2B and employer-focused offerings.',
+    source_name: 'LinkedIn', published_at: '2026-03-16T10:30:00Z',
+    ai_suggestion: 'New CPOs always audit vendor relationships in their first 90 days. Reach out now to introduce yourself and get ahead of that review — position Light-it as the digital product partner for their enterprise expansion.',
+    draft_message: `Hi Marcus,\n\nCongratulations on joining Calibrate as CPO — what an exciting time to step in. I've been following Calibrate's journey toward the employer market, and your background from Noom's enterprise team seems like a perfect fit.\n\nI'm Josefina, Head of Growth at Light-it, a healthtech digital product agency. We've been working with Calibrate's team on [current project] and would love to set up a quick intro call as you get settled into the role.\n\nWould 20 minutes this week or next work for you?\n\nLooking forward to it,\nJosefina`,
+    status: 'new'
+  },
+  {
+    id: 'a3', company_id: 'c7',
+    type: 'product_launch', priority: 'high',
+    title: 'Osmind launches AI-powered treatment outcome tracker',
+    summary: 'Osmind released a new AI feature that predicts patient treatment outcomes for ketamine and TMS therapies using longitudinal EHR data. The feature is now in beta with 200+ psychiatric practices.',
+    source_name: 'Osmind Blog', published_at: '2026-03-15T09:00:00Z',
+    ai_suggestion: 'Perfect moment to showcase Light-it\'s AI/ML capabilities. They\'re now building AI products — propose a roadmap conversation around AI features we could co-develop or accelerate.',
+    draft_message: `Hi Dr. Chen,\n\nThe new AI outcome tracker you launched looks fantastic — using longitudinal EHR data to predict ketamine and TMS outcomes is exactly the kind of innovation that sets Osmind apart.\n\nGiven the direction you're heading with AI, I wanted to check in on the roadmap. Light-it has been building out our AI/ML capabilities significantly over the past year, and I'd love to share what's possible — especially around predictive models and clinical decision support.\n\nWould love to schedule a product roadmap conversation. Are you free later this week?\n\nWarm regards,\nJosefina`,
+    status: 'new'
+  },
+  {
+    id: 'a4', company_id: 'c5',
+    type: 'hiring', priority: 'medium',
+    title: 'Wheel Health is hiring: 12 new engineering roles posted',
+    summary: 'Wheel Health posted 12 new engineering positions including backend engineers, mobile developers, and a Head of Platform Engineering. This suggests renewed product investment after a period of restructuring.',
+    source_name: 'LinkedIn Jobs', published_at: '2026-03-14T16:00:00Z',
+    ai_suggestion: 'Hiring spike after restructuring = re-engagement window. They may be rebuilding momentum with a new tech roadmap. Reach out to offer Light-it as a flexible, expert team that can accelerate delivery without full-time overhead.',
+    draft_message: `Hi Jamie,\n\nI noticed Wheel is back in active hiring mode — 12 engineering roles is a strong signal of renewed investment. That's exciting to see after the past year.\n\nI wanted to reach out because Light-it has worked with Wheel before on [project], and we've always admired the platform you're building. As you scale back up, we'd love to explore whether there are areas where our team could help accelerate delivery — especially if there are roadmap items you want to move fast on before you've finished hiring.\n\nHappy to hop on a quick call if the timing feels right.\n\nBest,\nJosefina`,
+    status: 'new'
+  },
+  {
+    id: 'a5', company_id: 'c9',
+    type: 'funding', priority: 'high',
+    title: 'Transcarent raises $126M Series C at $1.62B valuation',
+    summary: 'Transcarent announced a $126M Series C round, valuing the company at $1.62B. CEO Glen Tullman said the company will accelerate its AI-powered health navigation platform and expand into new employer markets.',
+    source_name: 'Forbes', published_at: '2026-03-13T11:00:00Z',
+    ai_suggestion: 'Unicorn status means aggressive roadmap. We have an active Intro Call — move this forward immediately. Freshly funded companies move fast and need trusted vendors. Get the next meeting booked this week.',
+    draft_message: `Hi Glen,\n\nHuge congratulations on the Series C and hitting unicorn status — $1.62B is a tremendous milestone for Transcarent and reflects the real need you're solving for self-insured employers.\n\nI'm Josefina from Light-it, a healthtech digital product agency. We spoke briefly last week and I've been thinking about how we might help accelerate your AI navigation platform — particularly around the member-facing experience and integration layers that drive engagement.\n\nWith fresh capital and an ambitious roadmap, I imagine you're evaluating how to build fast without sacrificing quality. That's exactly where we shine.\n\nWould love to move our conversation forward. Could we find time this week?\n\nBest,\nJosefina`,
+    status: 'new'
+  },
+  {
+    id: 'a6', company_id: 'c4',
+    type: 'news', priority: 'medium',
+    title: 'Brightside Health featured in TIME\'s Most Innovative Companies',
+    summary: 'Brightside Health was named to TIME\'s 2026 Most Innovative Companies list for their outcomes-based care model showing 70% remission rates for anxiety and depression.',
+    source_name: 'TIME Magazine', published_at: '2026-03-12T08:00:00Z',
+    ai_suggestion: 'Perfect warm outreach trigger. Use the recognition to re-engage — celebrate their win, then pivot to how Light-it can help them scale the product to match their growing reputation.',
+    draft_message: `Hi Shiv,\n\nCongratulations on making TIME's Most Innovative Companies list! A 70% remission rate is an extraordinary clinical outcome and it's wonderful to see that work getting the recognition it deserves.\n\nWe're at the early stages of our conversation at Light-it, and I couldn't resist reaching out to celebrate this milestone. Companies like Brightside — outcome-driven, mission-focused — are exactly who we love building with.\n\nWould you be open to continuing our discovery conversation this month? We have some interesting ideas about how to scale the care experience without adding clinical overhead.\n\nCongratulations again,\nJosefina`,
+    status: 'new'
+  },
+  {
+    id: 'a7', company_id: 'c10',
+    type: 'award', priority: 'medium',
+    title: 'Sprinter Health wins HIMSS 2026 Digital Health Innovation Award',
+    summary: 'Sprinter Health received the prestigious HIMSS 2026 Digital Health Innovation Award for their in-home preventive care model that has served 500K+ patients across 8 states.',
+    source_name: 'HIMSS', published_at: '2026-03-11T14:00:00Z',
+    ai_suggestion: 'Award recognition during active RFP stage is ideal. Send a personal congratulations note referencing the award to keep Light-it top of mind while their team evaluates vendors.',
+    draft_message: `Hi Maria,\n\nWow — the HIMSS Digital Health Innovation Award! What a well-deserved recognition for what you've built at Sprinter. Reaching 500K patients with in-home preventive care in 8 states is genuinely impressive.\n\nWe're really enjoying our RFP conversations and this news makes me even more excited about the potential partnership. Light-it has been building digital health products for nearly a decade, and the opportunity to support Sprinter's next phase of growth would be a highlight for us.\n\nLooking forward to continuing the conversation. Congratulations to the whole team!\n\nWarmly,\nJosefina`,
+    status: 'new'
+  },
+  {
+    id: 'a8', company_id: 'c2',
+    type: 'news', priority: 'medium',
+    title: 'Nuvation Bio presents Phase 2 data at ASCO Annual Meeting',
+    summary: 'Nuvation Bio will present updated Phase 2 clinical trial data for NUV-868, their BET inhibitor, at the ASCO Annual Meeting in June 2026. Early data shows promising response rates in solid tumors.',
+    source_name: 'PR Newswire', published_at: '2026-03-10T10:00:00Z',
+    ai_suggestion: 'ASCO presentation means investor and pharma attention. Check if their digital platform needs to scale for increased trial management and data capture. Reach out to discuss roadmap timing.',
+    draft_message: `Hi David,\n\nExciting news about NUV-868's ASCO presentation — Phase 2 data in solid tumors is a major milestone. June will be a big moment for the team.\n\nAs you prepare for ASCO and the attention that will follow, I wanted to check in on the digital platform roadmap. Increased trial activity and potential partnerships often come with new data management and patient-facing requirements. We'd love to get ahead of any needs you're anticipating.\n\nWould love to sync before the conference. What does March look like for a quick catch-up?\n\nBest,\nJosefina`,
+    status: 'new'
+  },
+  {
+    id: 'a9', company_id: 'c6',
+    type: 'hiring', priority: 'low',
+    title: 'Sana Benefits hiring VP of Technology',
+    summary: 'Sana Benefits posted a VP of Technology role, their most senior tech hire in two years. The job description emphasizes platform modernization and API-first architecture.',
+    source_name: 'LinkedIn', published_at: '2026-03-09T09:00:00Z',
+    ai_suggestion: 'A VP of Tech hire focused on platform modernization is a buying signal. Time the re-engagement for when the new hire starts — they\'ll be looking to make an impact quickly and may need external expertise.',
+    draft_message: `Hi Ben,\n\nI saw Sana is looking for a VP of Technology with a focus on platform modernization — interesting timing given where you are in the product journey.\n\nWanted to check in from Light-it's side. We worked together on [project] and have really enjoyed the relationship. As you bring in new technical leadership, we'd love to reconnect and share some of the work we've been doing in similar API-first modernization projects with healthtech companies.\n\nOpen to a quick call when the time is right.\n\nBest,\nJosefina`,
+    status: 'new'
+  },
+  {
+    id: 'a10', company_id: 'c3',
+    type: 'product_launch', priority: 'medium',
+    title: 'Calibrate launches employer-facing benefits portal',
+    summary: 'Calibrate Health released a new B2B benefits portal allowing HR teams to track employee enrollment, engagement, and outcomes in their metabolic health programs. This marks Calibrate\'s pivot to enterprise.',
+    source_name: 'Calibrate Blog', published_at: '2026-03-08T13:00:00Z',
+    ai_suggestion: 'They just shipped B2B — that means a new product surface area with enterprise requirements (SSO, admin controls, reporting). Reach out to offer Light-it\'s enterprise UX and integration expertise.',
+    draft_message: `Hi Alex,\n\nThe new employer benefits portal looks clean — congrats on shipping it! The move to give HR teams visibility into program engagement is exactly what enterprise buyers need to justify the investment.\n\nI imagine this opens up a significant list of feature requests from early employers. We're at proposal stage with Calibrate, and I'd love to explore how Light-it could help you iterate fast on the enterprise portal without pulling your core team away from the member experience.\n\nWould love to schedule a call this week to discuss scope and timing.\n\nBest,\nJosefina`,
+    status: 'new'
+  },
+  {
+    id: 'a11', company_id: 'c1',
+    type: 'hiring', priority: 'low',
+    title: 'Headway expanding engineering team: 25 roles open',
+    summary: 'Following their Series D, Headway has opened 25 new engineering and product roles across backend, mobile, data engineering, and ML. The company is doubling its tech team size.',
+    source_name: 'LinkedIn', published_at: '2026-03-07T12:00:00Z',
+    ai_suggestion: 'Headway is doubling the tech team — that means internal hiring will be their focus, but they may still need specialized partners for specific product areas. Reference the relationship and offer focused support.',
+    draft_message: `Hi Sarah,\n\nTwenty-five new engineering roles — what a growth moment! Building out the team post-Series D is always an exciting (and busy!) time.\n\nWhile you're scaling the internal team, I wanted to note that Light-it is here to provide specialized support on areas where you want to move especially fast. We've done great work together on the clinician experience and I'd love to be part of the expansion story.\n\nNo rush — just wanted to stay connected during this exciting chapter.\n\nWarm regards,\nJosefina`,
+    status: 'new'
+  },
+  {
+    id: 'a12', company_id: 'c10',
+    type: 'news', priority: 'medium',
+    title: 'Sprinter Health expands to 3 new states with health system partnership',
+    summary: 'Sprinter Health announced partnerships with three regional health systems to expand in-home lab and preventive care to Texas, Georgia, and Ohio — adding 4M potential patients to their network.',
+    source_name: 'MedCity News', published_at: '2026-03-06T10:00:00Z',
+    ai_suggestion: 'Health system partnerships at scale = new integration requirements (EMR, scheduling, data exchange). This is a great angle to discuss in the active RFP — highlight Light-it\'s HL7 FHIR and health system integration experience.',
+    draft_message: `Hi Maria,\n\nJust read about the Texas, Georgia, and Ohio expansions via health system partnerships — three new markets and 4M potential patients is a bold move!\n\nWith major health system integrations on the horizon, I imagine there will be significant technical coordination around EMR connectivity, scheduling, and data exchange. That's an area where Light-it has deep experience — we've handled HL7 FHIR integrations for several clients.\n\nWould love to weave this into our RFP conversation. Are you free for a call later this week?\n\nBest,\nJosefina`,
+    status: 'new'
+  },
+];
+
+// ── Navigation ────────────────────────────────────────────────────────
+function navigate(screen, companyId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`screen-${screen}`).classList.add('active');
+  const navItem = document.querySelector(`[data-screen="${screen}"]`);
+  if (navItem) navItem.classList.add('active');
+
+  const titles = {
+    alerts: ['Alerts', 'Company intelligence feed'],
+    companies: ['Companies', 'All tracked accounts'],
+    detail: ['Company Detail', '']
+  };
+  const [title, subtitle] = titles[screen] || ['', ''];
+  document.getElementById('topbarTitle').textContent = title;
+  document.getElementById('topbarSubtitle').textContent = subtitle;
+
+  if (screen === 'detail' && companyId) {
+    loadCompanyDetail(companyId);
+  }
+  if (screen === 'companies') renderCompanies();
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────
+function showToast(message, type = 'info', icon = null) {
+  const icons = { success: '✓', warning: '⚠', info: '●' };
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span>${icon || icons[type]}</span><span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(10px)';
+    toast.style.transition = 'all 0.3s';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+// ── Data Loading ──────────────────────────────────────────────────────
+async function loadData() {
+  // Try Supabase first, fall back to demo data
+  try {
+    const { data: dbCompanies } = await sb.from('companies').select('*');
+    if (dbCompanies && dbCompanies.length > 0) {
+      allCompanies = dbCompanies;
+    } else {
+      // Seed demo data
+      await seedDemoData();
+      allCompanies = DEMO_COMPANIES;
+    }
+  } catch (e) {
+    allCompanies = DEMO_COMPANIES;
+  }
+
+  try {
+    const { data: dbAlerts } = await sb.from('alerts').select('*').eq('status', 'new').order('published_at', { ascending: false });
+    if (dbAlerts && dbAlerts.length > 0) {
+      allAlerts = dbAlerts;
+    } else {
+      allAlerts = DEMO_ALERTS;
+    }
+  } catch (e) {
+    allAlerts = DEMO_ALERTS;
+  }
+
+  updateStats();
+  renderAlerts();
+  document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+async function seedDemoData() {
+  try {
+    const companies = DEMO_COMPANIES.map(c => ({
+      id: c.id, name: c.name, website: c.website,
+      industry: c.industry, account_type: c.account_type,
+      crm_stage: c.crm_stage, last_contact: c.last_contact,
+      open_deals: c.open_deals, revenue: c.revenue,
+      description: c.description
+    }));
+    await sb.from('companies').upsert(companies, { onConflict: 'id' });
+
+    const alerts = DEMO_ALERTS.map(a => ({
+      id: a.id, company_id: a.company_id, type: a.type,
+      priority: a.priority, title: a.title, summary: a.summary,
+      source_name: a.source_name, ai_suggestion: a.ai_suggestion,
+      draft_message: a.draft_message, status: a.status,
+      published_at: a.published_at
+    }));
+    await sb.from('alerts').upsert(alerts, { onConflict: 'id' });
+  } catch(e) {
+    console.warn('Seed skipped:', e.message);
+  }
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────
+function updateStats() {
+  const visible = allAlerts.filter(a => a.status === 'new');
+  const high = visible.filter(a => a.priority === 'high');
+  const companies = new Set(visible.map(a => a.company_id));
+  document.getElementById('statTotal').textContent = visible.length;
+  document.getElementById('statHigh').textContent = high.length;
+  document.getElementById('statCompanies').textContent = companies.size;
+  document.getElementById('alertsBadge').textContent = visible.length;
+}
+
+// ── Alerts Rendering ──────────────────────────────────────────────────
+const TYPE_ICONS = {
+  funding: '💰', news: '📰', hiring: '👥',
+  product_launch: '🚀', leadership: '👤', award: '🏆'
+};
+const TYPE_LABELS = {
+  funding: 'Funding', news: 'News', hiring: 'Hiring',
+  product_launch: 'Product Launch', leadership: 'Leadership Change', award: 'Award'
+};
+const ACCOUNT_BADGES = {
+  'Active Client':   'badge-active',
+  'Inactive Client': 'badge-inactive',
+  'Open Pipeline':   'badge-pipeline',
+  'Standby':         'badge-standby',
+  'Lost':            'badge-lost',
+};
+
+function getCompany(id) {
+  return allCompanies.find(c => c.id === id) || { name: 'Unknown', account_type: 'Open Pipeline' };
+}
+
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const h = Math.floor(diff / 3600000);
+  if (h < 1) return 'Just now';
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  if (d === 1) return 'Yesterday';
+  return `${d}d ago`;
+}
+
+function renderAlerts(filter) {
+  filter = filter || activeFilter;
+  const list = document.getElementById('alertsList');
+  let alerts = allAlerts.filter(a => a.status === 'new');
+
+  if (filter === 'high') alerts = alerts.filter(a => a.priority === 'high');
+  else if (filter !== 'all') alerts = alerts.filter(a => a.type === filter);
+
+  if (alerts.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🎉</div>
+        <div class="empty-title">All caught up!</div>
+        <div class="empty-text">No alerts matching this filter right now.</div>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = alerts.map(alert => {
+    const company = getCompany(alert.company_id);
+    const badgeClass = ACCOUNT_BADGES[company.account_type] || 'badge-pipeline';
+    return `
+    <div class="alert-card ${alert.type}" id="alert-${alert.id}" data-id="${alert.id}">
+      <div class="alert-header">
+        <div>
+          <div class="alert-company-row">
+            <span class="alert-company-name" onclick="navigate('detail','${company.id}')">${company.name}</span>
+            <span class="badge ${badgeClass}">${company.account_type}</span>
+            <span class="priority-tag priority-${alert.priority}">${alert.priority === 'high' ? '🔥' : alert.priority === 'medium' ? '⚡' : '·'} ${alert.priority.charAt(0).toUpperCase() + alert.priority.slice(1)}</span>
+          </div>
+        </div>
+        <span class="alert-time">${timeAgo(alert.published_at)}</span>
+      </div>
+      <div class="alert-body">
+        <div class="alert-type-row">
+          <span class="alert-type-icon">${TYPE_ICONS[alert.type]}</span>
+          <span class="alert-type-label ${alert.type}">${TYPE_LABELS[alert.type]}</span>
+        </div>
+        <div class="alert-title">${alert.title}</div>
+        <div class="alert-summary">${alert.summary}</div>
+      </div>
+      ${alert.ai_suggestion ? `
+      <div class="ai-suggestion-box">
+        <span class="ai-icon">✦</span>
+        <div>
+          <div class="ai-label">AI Suggestion</div>
+          <div class="ai-text">${alert.ai_suggestion}</div>
+        </div>
+      </div>` : ''}
+      <div class="alert-actions">
+        <button class="action-btn draft" onclick="openDraft('${alert.id}')">✉️ Draft Message</button>
+        <button class="action-btn contacted" onclick="markContactedDirect('${alert.id}')">✓ Contacted</button>
+        <button class="action-btn" onclick="openSnooze('${alert.id}')">⏰ Snooze</button>
+        <button class="action-btn" onclick="openShare('${alert.id}')">🔗 Share</button>
+        <button class="action-btn dismiss" onclick="dismissAlert('${alert.id}')">✕ Dismiss</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterAlerts(filter) {
+  activeFilter = filter;
+  document.querySelectorAll('#alertFilterBar .chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.filter === filter);
+  });
+  renderAlerts(filter);
+}
+
+function refreshAlerts() {
+  document.getElementById('alertsList').innerHTML = `
+    <div class="empty-state">
+      <div class="spinner" style="margin:0 auto 16px"></div>
+      <div class="empty-text">Refreshing…</div>
+    </div>`;
+  setTimeout(() => {
+    renderAlerts();
+    showToast('Alerts refreshed', 'success');
+  }, 800);
+}
+
+// ── Companies Rendering ───────────────────────────────────────────────
+function renderCompanies() {
+  const search = (document.getElementById('companySearch')?.value || '').toLowerCase();
+  let companies = allCompanies;
+  if (activeCompanyFilter !== 'all') companies = companies.filter(c => c.account_type === activeCompanyFilter);
+  if (search) companies = companies.filter(c => c.name.toLowerCase().includes(search) || (c.industry||'').toLowerCase().includes(search));
+
+  const tbody = document.getElementById('companiesTableBody');
+  if (companies.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text3)">No companies found.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = companies.map(c => {
+    const badgeClass = ACCOUNT_BADGES[c.account_type] || 'badge-pipeline';
+    const lastContact = c.last_contact ? new Date(c.last_contact).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '—';
+    return `<tr>
+      <td><span class="company-link" onclick="navigate('detail','${c.id}')">${c.name}</span></td>
+      <td><span class="badge ${badgeClass}">${c.account_type}</span></td>
+      <td style="color:var(--text2)">${c.industry || '—'}</td>
+      <td><span class="stage-tag">${c.crm_stage || '—'}</span></td>
+      <td style="color:var(--text2)">${lastContact}</td>
+      <td style="color:var(--text2);text-align:center">${c.open_deals ?? 0}</td>
+    </tr>`;
+  }).join('');
+}
+
+function filterCompanies(filter) {
+  activeCompanyFilter = filter;
+  document.querySelectorAll('[data-cfilter]').forEach(c => {
+    c.classList.toggle('active', c.dataset.cfilter === filter);
+  });
+  renderCompanies();
+}
+
+function searchCompanies() { renderCompanies(); }
+
+// ── Company Detail ────────────────────────────────────────────────────
+function loadCompanyDetail(id) {
+  const c = allCompanies.find(co => co.id === id);
+  if (!c) return;
+
+  document.getElementById('detailName').textContent = c.name;
+  const badgeClass = ACCOUNT_BADGES[c.account_type] || 'badge-pipeline';
+  document.getElementById('detailBadge').innerHTML = `<span class="badge ${badgeClass}">${c.account_type}</span>`;
+  document.getElementById('detailWebsite').innerHTML = c.website
+    ? `🌐 <a href="https://${c.website}" target="_blank">${c.website}</a>` : '';
+  document.getElementById('detailIndustry').textContent = c.industry ? `🏭 ${c.industry}` : '';
+  document.getElementById('detailLastContact').textContent = c.last_contact
+    ? new Date(c.last_contact).toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' }) : '—';
+  document.getElementById('detailOpenDeals').textContent = c.open_deals ?? 0;
+  document.getElementById('detailRevenue').textContent = c.revenue || '—';
+  document.getElementById('detailStage').textContent = c.crm_stage || '—';
+
+  document.getElementById('topbarSubtitle').textContent = c.description || '';
+
+  // Alert history
+  const companyAlerts = allAlerts.filter(a => a.company_id === id);
+  const timeline = document.getElementById('detailTimeline');
+  if (companyAlerts.length === 0) {
+    timeline.innerHTML = `<div class="empty-state"><div class="empty-text" style="font-size:13px">No alerts for this company yet.</div></div>`;
+    return;
+  }
+  timeline.innerHTML = companyAlerts.map((alert, i) => `
+    <div class="timeline-item">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0">
+        <div class="timeline-dot" style="background:var(--${alert.type === 'funding' ? 'funding' : alert.type === 'news' ? 'news' : alert.type === 'hiring' ? 'hiring' : 'launch'});margin-top:14px"></div>
+        ${i < companyAlerts.length - 1 ? '<div class="timeline-connector" style="min-height:40px"></div>' : ''}
+      </div>
+      <div class="timeline-content" style="margin-top:8px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span>${TYPE_ICONS[alert.type]}</span>
+          <span class="alert-type-label ${alert.type}" style="font-size:10px">${TYPE_LABELS[alert.type]}</span>
+          <span class="timeline-date" style="margin-left:auto">${timeAgo(alert.published_at)}</span>
+        </div>
+        <div class="timeline-content-title">${alert.title}</div>
+        <div class="timeline-content-text">${alert.summary.substring(0, 120)}…</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── Draft Message ─────────────────────────────────────────────────────
+function openDraft(alertId) {
+  const alert = allAlerts.find(a => a.id === alertId);
+  if (!alert) return;
+  const company = getCompany(alert.company_id);
+  activeDraftAlertId = alertId;
+
+  document.getElementById('draftModalSubtitle').textContent = `${company.name} · ${TYPE_LABELS[alert.type]}`;
+  document.getElementById('draftContext').textContent = alert.title;
+  document.getElementById('draftMessage').textContent = alert.draft_message || 'No draft available.';
+
+  openModal('draftModal');
+}
+
+function copyDraft() {
+  const text = document.getElementById('draftMessage').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Message copied to clipboard!', 'success');
+  });
+}
+
+function markContacted() {
+  if (activeDraftAlertId) {
+    closeModal('draftModal');
+    dismissWithAction(activeDraftAlertId, 'contacted');
+    activeDraftAlertId = null;
+  }
+}
+
+function markContactedDirect(alertId) {
+  dismissWithAction(alertId, 'contacted');
+}
+
+// ── Snooze ────────────────────────────────────────────────────────────
+function openSnooze(alertId) {
+  activeSnoozeAlertId = alertId;
+  selectedSnooze = null;
+  document.querySelectorAll('.snooze-option').forEach(o => o.classList.remove('selected'));
+
+  const now = new Date();
+  const fmt = d => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+  const h1 = new Date(now.getTime() + 3600000);
+  const h3 = new Date(now.getTime() + 10800000);
+  const tom = new Date(now); tom.setDate(tom.getDate() + 1); tom.setHours(9, 0, 0);
+  const nw  = new Date(now); nw.setDate(nw.getDate() + 7);  nw.setHours(9, 0, 0);
+
+  document.getElementById('snoozeTime1h').textContent = fmt(h1);
+  document.getElementById('snoozeTime3h').textContent = fmt(h3);
+  document.getElementById('snoozeTimeTomorrow').textContent = `Tomorrow ${fmt(tom)}`;
+  document.getElementById('snoozeTimeNextweek').textContent = nw.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+  openModal('snoozeModal');
+}
+
+function selectSnooze(value, el) {
+  selectedSnooze = value;
+  document.querySelectorAll('.snooze-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function confirmSnooze() {
+  if (!selectedSnooze) { showToast('Please select a snooze duration', 'warning'); return; }
+  closeModal('snoozeModal');
+  dismissWithAction(activeSnoozeAlertId, 'snoozed');
+  showToast('Alert snoozed ⏰', 'info');
+  activeSnoozeAlertId = null;
+  selectedSnooze = null;
+}
+
+// ── Share ─────────────────────────────────────────────────────────────
+function openShare(alertId) {
+  activeShareAlertId = alertId;
+  openModal('shareModal');
+}
+
+function shareVia(method) {
+  const alert = allAlerts.find(a => a.id === activeShareAlertId);
+  if (!alert) return;
+  const company = getCompany(alert.company_id);
+  const text = `${TYPE_ICONS[alert.type]} ${alert.title}\n\n${alert.summary}\n\n— JotzAI Company Intelligence`;
+
+  closeModal('shareModal');
+
+  if (method === 'copy') {
+    navigator.clipboard.writeText(text);
+    showToast('Copied to clipboard!', 'success');
+  } else if (method === 'email') {
+    window.open(`mailto:?subject=${encodeURIComponent(alert.title)}&body=${encodeURIComponent(text)}`);
+    showToast('Opening email client…', 'info');
+  } else if (method === 'slack') {
+    showToast('Slack integration coming soon!', 'info');
+  }
+}
+
+// ── Dismiss ───────────────────────────────────────────────────────────
+function dismissAlert(alertId) {
+  dismissWithAction(alertId, 'dismissed');
+}
+
+async function dismissWithAction(alertId, action) {
+  const card = document.getElementById(`alert-${alertId}`);
+  if (card) {
+    card.classList.add('dismissing');
+    setTimeout(() => { card.remove(); updateStats(); }, 300);
+  }
+
+  // Update in-memory state
+  const alertIdx = allAlerts.findIndex(a => a.id === alertId);
+  if (alertIdx !== -1) allAlerts[alertIdx].status = action;
+
+  if (action === 'contacted') {
+    contactedCount++;
+    document.getElementById('statContacted').textContent = contactedCount;
+    showToast(`Marked as Contacted ✓`, 'success');
+  } else if (action === 'dismissed') {
+    showToast('Alert dismissed', 'info');
+  }
+
+  updateStats();
+
+  // Persist to Supabase
+  try {
+    await sb.from('alerts').update({ status: action, updated_at: new Date().toISOString() }).eq('id', alertId);
+  } catch(e) { /* offline graceful */ }
+}
+
+// ── Modal Helpers ─────────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+// Keyboard: Esc to close
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+// ── Init ──────────────────────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>
