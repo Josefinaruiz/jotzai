@@ -873,7 +873,7 @@
         <span id="syncLabel">Live</span>
       </div>
       <button class="btn btn-ghost btn-sm" onclick="refreshAlerts()">↻ Refresh</button>
-      <button class="btn btn-green btn-sm" onclick="showToast('Sync started!', 'success')">⚡ Sync CRM</button>
+      <button class="btn btn-green btn-sm" onclick="syncCopperCRM()">⚡ Sync CRM</button>
     </div>
   </div>
 
@@ -1121,6 +1121,19 @@
   </div>
 </div>
 
+<!-- Sync Progress Modal -->
+<div class="modal-overlay" id="syncModal">
+  <div class="modal" style="max-width:400px;text-align:center">
+    <div style="font-size:32px;margin-bottom:12px">⚡</div>
+    <div class="modal-title" style="margin-bottom:8px">Syncing Copper CRM</div>
+    <div class="modal-subtitle" id="syncModalStatus" style="margin-bottom:20px">Starting…</div>
+    <div style="background:var(--bg2);border-radius:8px;overflow:hidden;height:6px;margin-bottom:8px">
+      <div id="syncProgressBar" style="height:100%;background:var(--green);width:0%;transition:width 0.4s ease;border-radius:8px"></div>
+    </div>
+    <div style="font-size:11px;color:var(--text3)" id="syncProgressLabel">0 companies processed</div>
+  </div>
+</div>
+
 <!-- ── SCRIPTS ── -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -1128,6 +1141,260 @@
 const SUPABASE_URL = 'https://ynnxqnnaszopeyvtoyys.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlubnhxbm5hc3pvcGV5dnRveXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTU4MjIsImV4cCI6MjA4OTQzMTgyMn0.8kLutEY3sSSPGDm_lPabDyS6wJcFu3lb2cP-RdJVkrc';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── Copper CRM Config ─────────────────────────────────────────────────
+const COPPER = {
+  BASE: 'https://api.copper.com/developer_api/v1',
+  TOKEN: '282d73278b4cd167db7594b21d59aa4b',
+  EMAIL: 'josefina@lightit.io',
+};
+const COPPER_HEADERS = {
+  'X-PW-AccessToken': COPPER.TOKEN,
+  'X-PW-Application': 'developer_api',
+  'X-PW-UserEmail': COPPER.EMAIL,
+  'Content-Type': 'application/json',
+};
+
+// ── Copper Reference Maps ─────────────────────────────────────────────
+const STAGE_MAP = {
+  // Deals pipeline (984115)
+  4546388: '1. MQL/PQL',
+  4546389: '2. Intro Call',
+  4546390: '3. Sales Qualified',
+  4546391: '4. Proposal Sent',
+  4546392: '5. Decision Maker Approved',
+  4546395: 'Standby',
+  4546396: 'Canceled',
+  // Partnerships pipeline (989328)
+  4555307: 'Lead',
+  4555308: 'Intro Call',
+  4555309: 'Agreement Sent',
+  4582592: 'Partner (no agreement)',
+  4606205: 'Not partner',
+  4619104: 'POC in place',
+  // ViVe pipeline (1001591)
+  4594939: 'Lead',
+  4595642: 'First Email',
+  4594940: 'Intro Call',
+  4594941: 'Sales Qualified',
+  4594942: 'Proposal Sent',
+  4594943: 'Decision Maker Approved',
+  4599191: 'Standby',
+};
+const INDUSTRY_MAP = {
+  1893179: 'Hospitals & Health Systems',
+  1805196: 'AI & Machine Learning',
+  1872305: 'Femtech & Women\'s Health',
+  1872306: 'Mental Health',
+  1872307: 'Nutrition & Metabolic Health',
+  1872308: 'Longevity & Regenerative Medicine',
+  1872310: 'Biotech & Life Sciences',
+  1872311: 'Health Insurance & Payers',
+  1872309: 'Pharmaceuticals',
+  1872312: 'Medical Research',
+  1872314: 'Healthcare Analytics',
+  1873822: 'Chronic Disease Management',
+  2025077: 'Elderly Care',
+  2025078: 'Genomics & Personalized Medicine',
+  1872313: 'Primary Care',
+  1793312: 'Other (Healthcare)',
+  1794604: 'Education & Workforce',
+  1794605: 'Enterprise Healthcare Software',
+  1793313: 'Other (Non-Healthcare)',
+  1794606: 'Sports, Fitness & Wellness',
+};
+// ── Copper API Helpers ────────────────────────────────────────────────
+async function copperPost(path, body) {
+  const res = await fetch(`${COPPER.BASE}${path}`, {
+    method: 'POST',
+    headers: COPPER_HEADERS,
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`Copper ${path} → ${res.status}`);
+  return res.json();
+}
+
+async function copperFetchAllPages(path, extraBody = {}) {
+  const results = [];
+  let page = 1;
+  while (true) {
+    const batch = await copperPost(path, { page_size: 200, page_number: page, ...extraBody });
+    results.push(...batch);
+    if (batch.length < 200) break;
+    page++;
+    await new Promise(r => setTimeout(r, 150)); // respect rate limit
+  }
+  return results;
+}
+
+// ── Sync Progress UI ──────────────────────────────────────────────────
+let syncInProgress = false;
+
+function setSyncStatus(text) {
+  document.getElementById('syncLabel').textContent = text;
+}
+function setSyncProgress(pct, label) {
+  const bar = document.getElementById('syncProgressBar');
+  const lbl = document.getElementById('syncProgressLabel');
+  const status = document.getElementById('syncModalStatus');
+  if (bar) bar.style.width = pct + '%';
+  if (lbl) lbl.textContent = label;
+  if (status) status.textContent = label;
+}
+
+// ── Main Copper Sync ──────────────────────────────────────────────────
+async function syncCopperCRM() {
+  if (syncInProgress) { showToast('Sync already in progress…', 'info'); return; }
+  syncInProgress = true;
+
+  // Show progress modal only when triggered manually (Sync CRM button).
+  // Background auto-syncs (called from loadData) run silently.
+  const loadingVisible = document.getElementById('loadingOverlay').style.display !== 'none';
+  const isBackground = loadingVisible;
+
+  try {
+    setSyncStatus('Syncing…');
+    if (!isBackground) {
+      openModal('syncModal');
+      setSyncProgress(0, 'Connecting to Copper CRM…');
+    }
+
+    // 1. Fetch all companies
+    setSyncProgress(5, 'Fetching companies (this may take ~15s)…');
+    const rawCompanies = await copperFetchAllPages('/companies/search');
+    setSyncProgress(35, `${rawCompanies.length} companies fetched — loading deals…`);
+
+    // 2. Fetch opportunities (Open + Won)
+    const [openOpps, wonOpps] = await Promise.all([
+      copperFetchAllPages('/opportunities/search', { statuses: ['Open'] }),
+      copperFetchAllPages('/opportunities/search', { statuses: ['Won'] }),
+    ]);
+    const allOpps = [...openOpps, ...wonOpps];
+    setSyncProgress(65, `${allOpps.length} deals loaded — processing…`);
+
+    // 3. Index opps by company_id
+    const companyOpps = {};
+    for (const o of allOpps) {
+      if (!o.company_id) continue;
+      if (!companyOpps[o.company_id]) companyOpps[o.company_id] = [];
+      companyOpps[o.company_id].push(o);
+    }
+
+    // 4. Map each company
+    const companies = [];
+    const SKIP_NAMES = new Set(['-', 'na', 'n/a', 'unknown', 'tbd', '']);
+    const nowSec = Date.now() / 1000;
+
+    for (const c of rawCompanies) {
+      const name = (c.name || '').trim();
+      if (!name || SKIP_NAMES.has(name.toLowerCase())) continue;
+
+      const cid = c.id;
+      const opps = companyOpps[cid] || [];
+      if (opps.length === 0) continue;
+
+      // Account type
+      const statuses = new Set(opps.map(o => o.status));
+      let account_type;
+      if (statuses.has('Won') && statuses.has('Open')) {
+        account_type = 'Active Client';
+      } else if (statuses.has('Won')) {
+        const latestWon = Math.max(...opps.filter(o => o.status === 'Won').map(o => o.date_modified || 0));
+        account_type = (nowSec - latestWon) / 86400 < 365 ? 'Active Client' : 'Inactive Client';
+      } else if (statuses.has('Open')) {
+        account_type = 'Open Pipeline';
+      } else {
+        account_type = 'Lost';
+      }
+
+      // CRM stage from latest open deal
+      const openOppsForCo = opps.filter(o => o.status === 'Open');
+      let crm_stage = null;
+      if (openOppsForCo.length > 0) {
+        const latest = openOppsForCo.reduce((a, b) => (a.date_modified || 0) > (b.date_modified || 0) ? a : b);
+        crm_stage = STAGE_MAP[latest.pipeline_stage_id] || null;
+      }
+
+      // Industry from custom fields (company first, then opp)
+      let industry = null;
+      const allCFs = [...(c.custom_fields || [])];
+      for (const o of opps) allCFs.push(...(o.custom_fields || []));
+      for (const cf of allCFs) {
+        if (cf.custom_field_definition_id === 581943 && cf.value) {
+          industry = INDUSTRY_MAP[cf.value] || null;
+          break;
+        }
+      }
+
+      // Revenue from Won deals
+      const wonTotal = opps.filter(o => o.status === 'Won').reduce((s, o) => s + (o.monetary_value || 0), 0);
+      const revenue = wonTotal >= 1000000 ? `$${(wonTotal/1000000).toFixed(1)}M`
+                    : wonTotal > 0        ? `$${wonTotal.toLocaleString()}`
+                    : null;
+
+      // Website
+      let website = null;
+      if (c.websites?.length > 0) {
+        website = c.websites[0].url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+      } else if (c.email_domain) {
+        website = c.email_domain;
+      }
+
+      // Last contact timestamp
+      const lastContactTs = c.date_last_contacted || c.date_modified;
+      const last_contact = lastContactTs
+        ? new Date(lastContactTs * 1000).toISOString().split('T')[0]
+        : null;
+
+      companies.push({
+        copper_id: String(cid),
+        name,
+        website,
+        industry,
+        account_type,
+        crm_stage,
+        last_contact,
+        open_deals: openOppsForCo.length,
+        revenue,
+      });
+    }
+
+    setSyncProgress(75, `Saving ${companies.length} companies to database…`);
+
+    // 5. Upsert to Supabase in batches of 100
+    const BATCH = 100;
+    for (let i = 0; i < companies.length; i += BATCH) {
+      const batch = companies.slice(i, i + BATCH);
+      const { error } = await sb.from('companies').upsert(batch, { onConflict: 'copper_id' });
+      if (error) console.warn('Upsert batch error:', error.message);
+      setSyncProgress(75 + Math.round((i / companies.length) * 20), `Saved ${Math.min(i + BATCH, companies.length)} / ${companies.length}…`);
+    }
+
+    // 6. Reload from Supabase
+    setSyncProgress(97, 'Reloading data…');
+    const { data: fresh } = await sb.from('companies').select('*').order('name');
+    if (fresh?.length > 0) allCompanies = fresh;
+
+    setSyncProgress(100, `Done! ${companies.length} companies synced.`);
+    setSyncStatus('Live');
+    localStorage.setItem('lastCopperSync', new Date().toISOString());
+
+    setTimeout(() => {
+      if (!isBackground) closeModal('syncModal');
+      showToast(`✓ Synced ${companies.length} companies from Copper CRM`, 'success');
+      updateStats();
+      if (document.getElementById('screen-companies').classList.contains('active')) renderCompanies();
+    }, 600);
+
+  } catch (err) {
+    console.error('Copper sync failed:', err);
+    setSyncStatus('Sync error');
+    if (!isBackground) closeModal('syncModal');
+    showToast(`Sync failed: ${err.message}`, 'warning');
+  } finally {
+    syncInProgress = false;
+  }
+}
 
 // ── App State ─────────────────────────────────────────────────────────
 let allAlerts    = [];
@@ -1318,25 +1585,40 @@ function showToast(message, type = 'info', icon = null) {
 
 // ── Data Loading ──────────────────────────────────────────────────────
 async function loadData() {
-  // Try Supabase first, fall back to demo data
   try {
-    const { data: dbCompanies } = await sb.from('companies').select('*');
+    // Load companies: prefer Supabase, auto-sync from Copper if empty
+    const { data: dbCompanies, error: compErr } = await sb.from('companies').select('*').order('name');
     if (dbCompanies && dbCompanies.length > 0) {
       allCompanies = dbCompanies;
+      // Background re-sync if last sync was >6 hours ago
+      const lastSync = localStorage.getItem('lastCopperSync');
+      const stale = !lastSync || (Date.now() - new Date(lastSync).getTime()) > 6 * 3600000;
+      if (stale) {
+        syncCopperCRM(); // fire and forget
+      } else {
+        setSyncStatus('Live');
+      }
     } else {
-      // Seed demo data
-      await seedDemoData();
+      // First run: sync from Copper, seed demo alerts while loading
       allCompanies = DEMO_COMPANIES;
+      syncCopperCRM();
     }
   } catch (e) {
     allCompanies = DEMO_COMPANIES;
+    setSyncStatus('Offline');
   }
 
+  // Load alerts: prefer Supabase, fall back to demo
   try {
-    const { data: dbAlerts } = await sb.from('alerts').select('*').eq('status', 'new').order('published_at', { ascending: false });
+    const { data: dbAlerts } = await sb
+      .from('alerts')
+      .select('*')
+      .neq('status', 'dismissed')
+      .order('published_at', { ascending: false });
     if (dbAlerts && dbAlerts.length > 0) {
       allAlerts = dbAlerts;
     } else {
+      await seedDemoAlerts();
       allAlerts = DEMO_ALERTS;
     }
   } catch (e) {
@@ -1348,17 +1630,10 @@ async function loadData() {
   document.getElementById('loadingOverlay').style.display = 'none';
 }
 
-async function seedDemoData() {
+async function seedDemoAlerts() {
+  // Seed demo alerts linked to real Copper companies by name matching
+  // (alerts use company UUID from Supabase, so re-keyed on load)
   try {
-    const companies = DEMO_COMPANIES.map(c => ({
-      id: c.id, name: c.name, website: c.website,
-      industry: c.industry, account_type: c.account_type,
-      crm_stage: c.crm_stage, last_contact: c.last_contact,
-      open_deals: c.open_deals, revenue: c.revenue,
-      description: c.description
-    }));
-    await sb.from('companies').upsert(companies, { onConflict: 'id' });
-
     const alerts = DEMO_ALERTS.map(a => ({
       id: a.id, company_id: a.company_id, type: a.type,
       priority: a.priority, title: a.title, summary: a.summary,
@@ -1368,7 +1643,7 @@ async function seedDemoData() {
     }));
     await sb.from('alerts').upsert(alerts, { onConflict: 'id' });
   } catch(e) {
-    console.warn('Seed skipped:', e.message);
+    console.warn('Alert seed skipped:', e.message);
   }
 }
 
@@ -1401,7 +1676,10 @@ const ACCOUNT_BADGES = {
 };
 
 function getCompany(id) {
-  return allCompanies.find(c => c.id === id) || { name: 'Unknown', account_type: 'Open Pipeline' };
+  // Match by Supabase UUID or by copper_id (for legacy demo alerts)
+  return allCompanies.find(c => c.id === id || c.copper_id === id)
+      || DEMO_COMPANIES.find(c => c.id === id)
+      || { name: 'Unknown', account_type: 'Open Pipeline' };
 }
 
 function timeAgo(dateStr) {
