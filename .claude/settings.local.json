@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -X POST \"https://api.copper.com/developer_api/v1/companies/search\" -H \"X-PW-AccessToken: 282d73278b4cd167db7594b21d59aa4b\" -H \"X-PW-Application: developer_api\" -H \"X-PW-UserEmail: josefina@lightit.io\" -H \"Content-Type: application/json\" -d '{\"\"\"\"page_size\"\"\"\": 5}')",
+      "Bash(python3 -c \":*)"
+    ]
+  }
+}
