@@ -60,6 +60,14 @@ CREATE POLICY "Public access companies" ON companies FOR ALL USING (true) WITH C
 CREATE POLICY "Public access contacts" ON contacts FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Public access alerts" ON alerts FOR ALL USING (true) WITH CHECK (true);
 
+-- Lightranet enrichment columns (add if not present)
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS lightranet_id INTEGER UNIQUE;
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS lightranet_status TEXT;
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS total_billable_hours INTEGER;
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS current_billable_hours INTEGER;
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS lightranet_staff TEXT[];
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS description TEXT;
+
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_alerts_company ON alerts(company_id);
 CREATE INDEX IF NOT EXISTS idx_alerts_status ON alerts(status);
